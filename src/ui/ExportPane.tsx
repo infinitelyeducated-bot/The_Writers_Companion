@@ -4,6 +4,7 @@ import { buildEpub } from '../export/epub'
 import { saveAs, askWhereToSave, setAskWhereToSave } from '../util/saveAs'
 import { AppSnapshotsDialog } from './AppSnapshotsDialog'
 import { PublishPanel } from './PublishPanel'
+import { docToPlainText, docToHtml, docToRtf, docToFountain, chaptersZip } from '../io/formats'
 import { buildLibraryBackup, readLibraryFile, restoreLibraryBackup } from '../db/db'
 import { importFile } from '../io/import'
 import { docToMarkdown } from '../io/markdown'
@@ -90,6 +91,28 @@ export function ExportPane({ pageCount, onGoPrint }: { pageCount: number; onGoPr
     }
   }
 
+  const doFormat = async (kind: 'txt' | 'html' | 'rtf' | 'fountain' | 'chapters') => {
+    await flushNow()
+    setBusy(kind)
+    try {
+      const base = safeName(project.meta.title)
+      let blob: Blob
+      let name: string
+      let desc: string
+      if (kind === 'txt') { blob = new Blob([docToPlainText(project)], { type: 'text/plain;charset=utf-8' }); name = base + '.txt'; desc = 'Plain text' }
+      else if (kind === 'html') { blob = new Blob([docToHtml(project, assets)], { type: 'text/html;charset=utf-8' }); name = base + '.html'; desc = 'Web page' }
+      else if (kind === 'rtf') { blob = new Blob([docToRtf(project)], { type: 'application/rtf' }); name = base + '.rtf'; desc = 'Rich Text Format' }
+      else if (kind === 'fountain') { blob = new Blob([docToFountain(project)], { type: 'text/plain;charset=utf-8' }); name = base + '.fountain'; desc = 'Fountain screenplay' }
+      else { const z = await chaptersZip(project); blob = z.blob; name = base + '-chapters.zip'; desc = 'One file per chapter (zip)'; add(z.count + ' chapter files packed') }
+      const r = await saveAs(blob, name, desc)
+      add(r.saved ? desc + ' saved: ' + (r.name || name) + ' (' + (blob.size / 1024).toFixed(0) + ' KB)' : desc + ' save cancelled')
+    } catch (err) {
+      add('Export failed: ' + (err as Error).message)
+    } finally {
+      setBusy(null)
+    }
+  }
+
   const words = totalWords(project.doc)
 
   return (
@@ -109,6 +132,11 @@ export function ExportPane({ pageCount, onGoPrint }: { pageCount: number; onGoPr
           <div className="btn-row">
             <button className="btn primary" disabled={busy !== null} onClick={() => void doDocx()}>⤓ Export .docx</button>
             <button className="btn ghost" disabled={busy !== null} onClick={() => void doMd()}>⤓ Export .md</button>
+            <button className="btn ghost" disabled={busy !== null} onClick={() => void doFormat('txt')} title="Plain text: no formatting, opens anywhere">⤓ Export .txt</button>
+            <button className="btn ghost" disabled={busy !== null} onClick={() => void doFormat('html')} title="One self-contained web page with a contents list and pictures">⤓ Export .html</button>
+            <button className="btn ghost" disabled={busy !== null} onClick={() => void doFormat('rtf')} title="Rich Text Format: opens in Word, Pages, LibreOffice, WordPad">⤓ Export .rtf</button>
+            <button className="btn ghost" disabled={busy !== null} onClick={() => void doFormat('fountain')} title="Screenplay text format for Final Draft, Highland, WriterDuet">⤓ Export .fountain</button>
+            <button className="btn ghost" disabled={busy !== null} onClick={() => void doFormat('chapters')} title="A zip with one Markdown file per chapter">⤓ One file per chapter (.zip)</button>
             <button className="btn ghost" disabled={busy !== null} onClick={() => fileRef.current?.click()}>⤒ Import .docx / .md / .txt</button>
           </div>
           <input ref={fileRef} type="file" accept=".docx,.md,.markdown,.txt,.html" hidden onChange={(e) => {

@@ -9,10 +9,22 @@ interior PDF, a print-ready cover PDF and an EPUB 3 ebook — all from one copy 
 Nothing is uploaded anywhere. There is no account, no server and no internet requirement
 after the first load. Everything is stored in your browser's own database on this machine.
 
-The Writers Companion is **freeware**. The first-launch agreement is the licence: you may use it; you
-do not own it, and you may not sell, rebrand or redistribute it as your product. There is
-no warranty and no support. Clicking **Yes — open The Writers Companion** records that on this device
-so you are only asked once.
+**The first-launch gateway.** The first time you open The Writers Companion it asks one question and the only
+way in is to answer **Yes**. The statement it shows is:
+
+> The Software was written and is copyrighted. It is not to be altered in any way other than the use
+> of writers to explore as a tool to help create and motivate. It was with that intention that The
+> Writers Companion was meant.
+>
+> You owe me nothing and I owe you nothing, and I own nothing you create with this app. I do ask that
+> you donate to a local charity to encourage literacy and community.
+>
+> Other than that, enjoy. I wish you the best!!!
+
+In plain terms: the app itself is not to be altered, **the author claims no ownership of anything you
+create with it**, you owe the author nothing, and a gift to a local literacy or community charity is
+asked for, not required. **No** closes the page and stores nothing, so the question comes back next
+time. **Yes** is remembered on this device, so you are only asked once.
 
 ---
 
@@ -21,7 +33,7 @@ so you are only asked once.
 | You want to… | Where | How it works |
 |---|---|---|
 | Start over | Library → **Reset The Writers Companion to default** (red) | Erases every book and setting in this browser and returns The Writers Companion to first launch. Asks first; cannot be undone. |
-| Accept the licence | First launch | Read the freeware terms. **Yes** opens the app; **No** closes it. |
+| Answer the gateway question | First launch | Read the statement and answer. **Yes** opens the app and is remembered on this device; **No** closes the page and stores nothing. You must answer Yes to use the app. |
 | Browse books | Library | Covers on a shelf. Search by title, author or genre. |
 | Start a book | Library → New book | Title, author, genre, then a **layout family** (trade, children's, poetry, play, screenplay, technical, memoir). |
 | Open a worked example | Library shelf | **25 complete short books, one per layout family**, plus the sample novella. Duplicate one to keep the original. |
@@ -39,7 +51,7 @@ so you are only asked once.
 | Check it will print | Print layout, right column | KDP-style readiness: page count, gutter, margins, image DPI, empty chapters, bleed vs crop marks. |
 | Interior PDF | Print layout → Interior PDF | Desktop: print window → Save as PDF. Phones: the button explains you need a computer. |
 | Design the jacket | Cover | Full wrap (back + spine + front) from page count × paper thickness. Print PDF or ebook PNG. |
-| Export the book | Export | EPUB 3, DOCX, Markdown, project backup JSON. Import the reverse. |
+| Export the book | Export | **EPUB 3, Word .docx, Markdown, plain text, web page (.html), Rich Text (.rtf), Fountain screenplay (.fountain), one file per chapter (.zip)**, and a project backup (.json). Every export has a Save as step. Import the reverse (Word, Markdown, text, HTML). |
 | Keep history | Editor, bottom | Snapshots on session start, every ten minutes, and before destructive work. Snapshots now carry **settings too** (layout, art, typography), so Restore brings the whole workspace back. |
 | Set a goal & autosave | **◎ box, right of + Part** (lower-left on other tabs) | Closed by default. Writing goal in words with a progress bar, and the workspace autosave interval — every 5 minutes by default, changeable in 5-minute steps up to 60. |
 | Find & replace | **Search bar in the app bar** (next to the type tools) | Searches every chapter and scene. Match case, whole word; smart quotes match straight ones. Replace all takes a snapshot first. Hover the bar for the full description. |
@@ -90,7 +102,7 @@ library. Pick one address and stay with it, or your books will appear to "disapp
 
 ---
 
-## Layout families, and seven worked examples
+## Layout families, and 25 worked examples
 
 A book is not just words in a typeface. A children's picture book, a poem, a play and a
 crime novel all have their own conventions about page size, indents, spacing, headings and
@@ -115,7 +127,41 @@ Quick comparison:
 | **Technical manual** | 7 × 10 | Tight leading, left-aligned headings, numbered steps, TOC down to sections, endnotes, index |
 | **Literary memoir** | 5.25 × 8 | Drop caps, warm serif, word-numbered chapters, vignette every fourth page, ornaments between sections |
 
-**Seven examples are already in your library**, one per family. Each is a short but
+<!-- families:start (generated by scripts/guide-families.cjs) -->
+Eighteen more families are built for particular writers and genres. Each has its own worked example, so you can open one and see the page it makes.
+
+**For writers**
+
+| Family | Page | Type and what makes it itself |
+|---|---|---|
+| **First-time novelists** | 5.5 × 8.5 | Literata 11.5 pt, leading 1.5; chapter numbers in words, contents page |
+| **Series authors** | 5.25 × 8 | Crimson Pro 11.5 pt, leading 1.45; drop caps, chapter numbers in words, diamond scene breaks |
+| **Busy professionals** | 6 × 9 | Source Serif 4 11 pt, leading 1.45; contents page, ragged right |
+| **Grandparents & family stories** | 6 × 9 | Lora 13 pt, leading 1.6; unnumbered chapters, contents page, fleuron scene breaks |
+| **Retirees** | 5.5 × 8.5 | Merriweather 12.5 pt, leading 1.6; contents page, asterism scene breaks |
+| **Hobby writers** | 5 × 8 | Alegreya 11.5 pt, leading 1.5; unnumbered chapters, contents page, fleuron scene breaks |
+| **Self-publishers** | 5.5 × 8.5 | Source Serif 4 11.5 pt, leading 1.5; contents page |
+
+**For genres**
+
+| Family | Page | Type and what makes it itself |
+|---|---|---|
+| **Romance** | 5.5 × 8.5 | Cormorant Garamond 13 pt, leading 1.5; drop caps, chapter numbers in words, fleuron scene breaks |
+| **Fantasy** | 6 × 9 | EB Garamond 12.5 pt, leading 1.45; drop caps, chapter numbers in words, contents page, diamond scene breaks |
+| **Sci-Fi** | 6 × 9 | Newsreader 11.5 pt, leading 1.45; rule scene breaks |
+| **Mystery, thriller & suspense** | 5.5 × 8.5 | Merriweather 11 pt, leading 1.45; rule scene breaks |
+| **Paranormal** | 5.5 × 8.5 | Spectral 11.5 pt, leading 1.5; drop caps, chapter numbers in words, diamond scene breaks |
+| **Action & adventure** | 6 × 9 | Bitter 11 pt, leading 1.4 |
+| **Historical fiction** | 6 × 9 | Old Standard TT 11.5 pt, leading 1.5; drop caps, chapter numbers in words, contents page, fleuron scene breaks |
+| **Horror** | 5.5 × 8.5 | Spectral 11.5 pt, leading 1.5; chapter numbers in words, asterism scene breaks |
+| **Drama & literary** | 5.5 × 8.5 | Newsreader 12 pt, leading 1.5; unnumbered chapters |
+| **Young adult** | 5.5 × 8.5 | Lora 12 pt, leading 1.55 |
+| **Novellas & short stories** | 5.25 × 8 | Crimson Pro 12 pt, leading 1.5; unnumbered chapters, contents page, asterism scene breaks |
+
+Every family also sets its own front and back matter (for example Fantasy adds a character list, prologue and glossary; Self-publishers adds Also By, About the Author and a colophon), running heads, folios and a matching cover palette. Pick the closest one, then change any rule on **Print layout**.
+<!-- families:end -->
+
+**25 examples are already in your library**, one per family. Each is a short but
 complete book rather than filler text. Open any of them, then:
 
 - **Print layout** to see the pages it produces and change any rule;
@@ -123,7 +169,7 @@ complete book rather than filler text. Open any of them, then:
 - **Layout family** at the top of the print settings to switch styles; your artwork is kept,
   everything else changes.
 
-The seven examples and the sample novella are seeded the first time you open the app. They
+The 25 examples and the sample novella are seeded the first time you open the app. They
 are ordinary books — edit or delete them as you like; deleting one just removes it, and it
 will not come back on reload.
 
@@ -281,7 +327,7 @@ The first screen lists your books as covers on a shelf.
 - **Reset The Writers Companion to default** — the red button beside *+ New book*. It erases
   everything this copy of The Writers Companion has stored in your browser — every book, picture, note and
   snapshot, plus your skin, menu font and panel positions — and starts over exactly as
-  first opened: the licence screen, then the sample novella and the seven examples. A
+  first opened: the gateway question, then the sample novella and the 25 examples. A
   popup asks first, and says plainly: *this can't be undone; you'll lose everything not
   saved elsewhere.* To keep a book, save a JSON backup before you reset. The
   `writerscompanion-*.html` file itself is never changed by anything in the app, so there is
@@ -685,6 +731,11 @@ The **Export** tab gathers everything else:
   contents, front matter, images and endnotes, one XHTML document per chapter.
 - **DOCX** — the manuscript with proper Word headings and indents.
 - **Markdown** — the manuscript as `.md`.
+- **Plain text (.txt)** — no formatting at all: the title block, then each chapter under an upper-case heading, scene breaks as `* * *`, quotations indented. Opens anywhere.
+- **Web page (.html)** — one self-contained page with a contents list and your pictures embedded. Open it in any browser, or print it.
+- **Rich Text (.rtf)** — bold, italic, underline, strikethrough and small caps, centred chapter headings, a title page. Opens in Word, Pages, LibreOffice and WordPad.
+- **Fountain (.fountain)** — for screenplays. Scene headings, character cues (`NAME: line`), transitions (`FADE OUT.`) and action lines become Fountain, which Final Draft, Highland and WriterDuet import. Anything it cannot place is written as action.
+- **One file per chapter (.zip)** — each chapter, part and matter section as its own numbered Markdown file (`01-…md`, `02-…md`), in book order.
 - **Project backup (.json)** — the whole project, including notes, revision history and
   images, in one file. This is your insurance policy; keep one.
 - **Import** — the flip side, described above.
@@ -973,7 +1024,7 @@ and deliberately small, because the layout is already responsive:
 | Saving files | ordinary download | the Android share sheet | the iOS share sheet |
 | Interior PDF | print window → Save as PDF | button says so and explains | button says so and explains |
 | Cover PDF | full wrap with bleed | not offered | not offered |
-| Ebook cover PNG, EPUB, DOCX, Markdown, backup | yes | yes | yes |
+| Ebook cover PNG, EPUB, DOCX, Markdown, plain text, HTML, RTF, Fountain, chapter zip, backup | yes | yes | yes |
 | Text sizing | as set in the panel | as set | inputs forced to 16px so Safari does not zoom on focus |
 
 The reason PDF export is desktop-only is honest: it works by opening a print window and
@@ -987,7 +1038,7 @@ Each build was opened straight from disk with no server, in a 1440×900 desktop 
 in 412×915 / 390×844 phone viewports:
 
 - all three load with no external references beyond the Google Fonts stylesheet;
-- the seeded library (8 books, 7 examples) appears and a book paginates (13 pages);
+- the seeded library (26 books, 25 examples) appears and a book paginates (13 pages);
 - the PDF button reads *“Interior PDF”* on desktop and *“Interior PDF (needs a desktop)”* on
   the phones;
 - the EPUB export produces a valid archive (19 entries, `mimetype` first and uncompressed,
@@ -1022,7 +1073,7 @@ during development (layout overflow audit, PDF page-count and text checks, smoke
 
 ## A quick first run
 
-1. Accept the freeware licence (**Yes — open The Writers Companion**).
+1. Answer the gateway question (**Yes**).
 2. Open the sample book's cover.
 3. On **Write**, drag *Chapter One* above the part and watch the numbering change.
 4. Type a line with `"quotes" -- and an ellipsis...` and see it fix itself.

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const KEY = 'writerscompanion.license.v1'
+const KEY = 'writerscompanion.license.v2'
 
 export function licenseAccepted(): boolean {
   try {
@@ -11,11 +11,12 @@ export function licenseAccepted(): boolean {
 }
 
 /**
- * First-launch freeware gate. Shown once, before anything else in the app.
- * "Yes" records acceptance on this device and opens the app (never asked
- * again). "No" does not open the app: it asks the browser to close the file
- * and leaves a dead-end screen in case the browser blocks the auto-close.
- * Nothing is stored on decline, so relaunching asks again.
+ * First-launch gateway. Shown once, before anything else in the app, and the
+ * only way in is to answer Yes. "No" does not open the app: it asks the browser
+ * to close the page and leaves a dead-end screen in case the browser blocks the
+ * auto-close. Nothing is stored on decline, so relaunching asks again.
+ *
+ * The statement below is the author's own wording. Only spelling and punctuation were corrected.
  */
 export function LicenseGate({ onAccept }: { onAccept: () => void }) {
   const [declined, setDeclined] = useState(false)
@@ -24,7 +25,7 @@ export function LicenseGate({ onAccept }: { onAccept: () => void }) {
     try {
       localStorage.setItem(KEY, 'yes')
     } catch {
-      /* storage unavailable — still let them in this session */
+      /* storage unavailable: still let them in this session */
     }
     onAccept()
   }
@@ -37,16 +38,16 @@ export function LicenseGate({ onAccept }: { onAccept: () => void }) {
   if (declined) {
     return (
       <div className="modal-backdrop">
-        <div className="modal" role="dialog" aria-modal="true" aria-label="Licence declined">
+        <div className="modal" role="dialog" aria-modal="true" aria-label="Declined">
           <h2>You chose not to accept</h2>
           <div className="modal-body">
             <p className="muted">
-              The Writers Companion stays closed without your acceptance. Nothing was stored and nothing
+              The Writers Companion stays closed without your agreement. Nothing was stored and nothing
               was changed.
             </p>
             <p className="muted">
-              If this file or tab is still open, your browser blocked the automatic close —
-              please close it yourself.
+              If this file or tab is still open, your browser blocked the automatic close.
+              Please close it yourself.
             </p>
           </div>
           <div className="modal-actions">
@@ -61,41 +62,30 @@ export function LicenseGate({ onAccept }: { onAccept: () => void }) {
 
   return (
     <div className="modal-backdrop">
-      <div className="modal" role="dialog" aria-modal="true" aria-label="Freeware licence">
-        <h2>Before you open The Writers Companion</h2>
-        <div className="modal-body">
+      <div className="modal modal-gate" role="dialog" aria-modal="true" aria-labelledby="gate-title" aria-describedby="gate-body">
+        <h2 id="gate-title">Before you open The Writers Companion</h2>
+        <div className="modal-body gate-body" id="gate-body">
           <p>
-            <strong>The Writers Companion is freeware.</strong> It costs nothing and you may use it as
-            you like.
+            The Software was written and is copyrighted. It is not to be altered in any way other than
+            the use of writers to explore as a tool to help create and motivate. It was with that
+            intention that The Writers Companion was meant.
           </p>
-          <ul className="license-list">
-            <li>It comes with no warranty of any kind. If it eats your manuscript, I&rsquo;m sorry — but that&rsquo;s the deal.</li>
-            <li>It is not supported. There is no helpdesk, no SLA, and no promise of fixes.</li>
-            <li>
-              The creator(s) cannot and will not be held responsible for its use or misuse —
-              including lost work, bad print runs, or anything else that goes wrong.
-            </li>
-            <li>
-              It&rsquo;s free, so you don&rsquo;t get a warranty. Keep your own backups (Export
-              tab → Project backup).
-            </li>
-          </ul>
           <p>
-            <strong>You don&rsquo;t own this, so don&rsquo;t try to sell it.</strong> Freeware
-            means you may use The Writers Companion; it does not mean you may sell, rebrand, or
-            redistribute it as your product.
+            You owe me nothing and I owe you nothing, and I own nothing you create with this app. I do
+            ask that you donate to a local charity to encourage literacy and community.
           </p>
-          <p>If you like it, I&rsquo;m glad.</p>
-          <p className="muted small">
-            Your answer is remembered on this device, so this only appears once.
+          <p>Other than that, enjoy. I wish you the best!!!</p>
+          <p className="gate-question">
+            <strong>Do you agree to use The Writers Companion on these terms?</strong>
           </p>
+          <p className="muted small">Your answer is remembered on this device, so this only appears once.</p>
         </div>
         <div className="modal-actions">
           <button className="btn ghost" onClick={decline}>
             No
           </button>
           <button className="btn primary" onClick={accept} autoFocus>
-            Yes — open The Writers Companion
+            Yes
           </button>
         </div>
       </div>

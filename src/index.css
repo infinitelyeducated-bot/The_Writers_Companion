@@ -930,3 +930,8 @@ p.sc-first { font-variant: small-caps; letter-spacing: 0.04em; }
 .pub-stores { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 2px 14px; }
 .pub-listing { max-height: 340px; overflow: auto; white-space: pre-wrap; word-break: break-word; font: 12px/1.5 ui-monospace, Consolas, monospace; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin-top: 10px; }
 .pub-preview-select { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: inherit; }
+
+/* First-launch gateway */
+.modal-gate { width: 560px; }
+.gate-body p { line-height: 1.6; margin: 0 0 12px; }
+.gate-question { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
