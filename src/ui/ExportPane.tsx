@@ -3,6 +3,7 @@ import { useProject } from '../state/project'
 import { buildEpub } from '../export/epub'
 import { saveAs, askWhereToSave, setAskWhereToSave } from '../util/saveAs'
 import { AppSnapshotsDialog } from './AppSnapshotsDialog'
+import { PublishPanel } from './PublishPanel'
 import { buildLibraryBackup, readLibraryFile, restoreLibraryBackup } from '../db/db'
 import { importFile } from '../io/import'
 import { docToMarkdown } from '../io/markdown'
@@ -239,6 +240,8 @@ export function ExportPane({ pageCount, onGoPrint }: { pageCount: number; onGoPr
             ))}
           </div>
         </section>
+
+        <PublishPanel pageCount={pageCount} log={add} />
 
         <section className="export-card export-dest">
           <h3>Publish to retailers</h3>
