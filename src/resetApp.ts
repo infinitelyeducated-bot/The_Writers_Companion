@@ -24,8 +24,8 @@ function clearPrefixed(store: Storage) {
 export async function resetWritersCompanion(): Promise<void> {
   // all four tables in one transaction: a half-erased library is worse than
   // a failed reset
-  await db.transaction('rw', db.projects, db.assets, db.notes, db.snapshots, async () => {
-    await Promise.all([db.projects.clear(), db.assets.clear(), db.notes.clear(), db.snapshots.clear()])
+  await db.transaction('rw', db.projects, db.assets, db.notes, db.snapshots, db.appSnapshots, async () => {
+    await Promise.all([db.projects.clear(), db.assets.clear(), db.notes.clear(), db.snapshots.clear(), db.appSnapshots.clear()])
   })
   try {
     clearPrefixed(localStorage)

@@ -10,6 +10,7 @@ import { CoverPane } from './ui/CoverPane'
 import { ExportPane } from './ui/ExportPane'
 import type { Project } from './model/types'
 import { useSeedDemo } from './seed'
+import { useAppSnapshots } from './state/appSnapshots'
 import { LicenseGate, licenseAccepted } from './ui/LicenseGate'
 import { typicalFor } from './pageArt'
 import { GoalsBox } from './ui/GoalsBox'
@@ -43,6 +44,7 @@ function useLiveProject(id: string | null): Project | undefined {
 export function App() {
   const [licensed, setLicensed] = useState<boolean>(() => licenseAccepted())
   useSeedDemo(licensed)
+  useAppSnapshots(licensed)
   const [projectId, setProjectId] = useState<string | null>(hashProject())
   const project = useLiveProject(licensed ? projectId : null)
 

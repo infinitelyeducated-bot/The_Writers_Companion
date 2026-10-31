@@ -1,7 +1,9 @@
 import { useRef, useState } from 'react'
 import { useProject } from '../state/project'
 import { buildEpub } from '../export/epub'
-import { downloadBlob } from '../util/download'
+import { saveAs, askWhereToSave, setAskWhereToSave } from '../util/saveAs'
+import { AppSnapshotsDialog } from './AppSnapshotsDialog'
+import { buildLibraryBackup, readLibraryFile, restoreLibraryBackup } from '../db/db'
 import { importFile } from '../io/import'
 import { docToMarkdown } from '../io/markdown'
 import { exportDocx } from '../io/docx'
@@ -16,6 +18,8 @@ export function ExportPane({ pageCount, onGoPrint }: { pageCount: number; onGoPr
   const [log, setLog] = useState<string[]>([])
   const [busy, setBusy] = useState<string | null>(null)
   const [artPage, setArtPage] = useState(1)
+  const [askWhere, setAskWhere] = useState(askWhereToSave())
+  const [snapsOpen, setSnapsOpen] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const coverRef = useRef<HTMLInputElement>(null)
   const c = project.settings.cover
@@ -26,8 +30,8 @@ export function ExportPane({ pageCount, onGoPrint }: { pageCount: number; onGoPr
     setBusy('epub')
     try {
       const res = await buildEpub(project, assets)
-      downloadBlob(res.blob, res.fileName)
-      add(`EPUB built: ${res.fileName} (${res.files} files, ${(res.blob.size / 1024).toFixed(0)} KB)`)
+      const r = await saveAs(res.blob, res.fileName, 'EPUB 3 ebook')
+      add(r.saved ? `EPUB saved: ${r.name || res.fileName} (${res.files} files, ${(res.blob.size / 1024).toFixed(0)} KB)` : 'EPUB save cancelled')
       res.issues.forEach((i) => add('Note: ' + i))
     } catch (e) {
       add('EPUB failed: ' + (e as Error).message)
@@ -41,16 +45,16 @@ export function ExportPane({ pageCount, onGoPrint }: { pageCount: number; onGoPr
     setBusy('docx')
     try {
       const blob = await exportDocx(project)
-      downloadBlob(blob, safeName(project.meta.title) + '.docx')
-      add(`DOCX exported (${(blob.size / 1024).toFixed(0)} KB)`)
+      const r = await saveAs(blob, safeName(project.meta.title) + '.docx', 'Word document')
+      add(r.saved ? `DOCX saved: ${r.name} (${(blob.size / 1024).toFixed(0)} KB)` : 'DOCX save cancelled')
     } finally {
       setBusy(null)
     }
   }
 
-  const doMd = () => {
-    downloadBlob(new Blob([docToMarkdown(project.doc)], { type: 'text/markdown' }), safeName(project.meta.title) + '.md')
-    add('Markdown exported')
+  const doMd = async () => {
+    const r = await saveAs(new Blob([docToMarkdown(project.doc)], { type: 'text/markdown' }), safeName(project.meta.title) + '.md', 'Markdown')
+    add(r.saved ? 'Markdown saved: ' + r.name : 'Markdown save cancelled')
   }
 
   const doImport = async (f: File) => {
@@ -103,7 +107,7 @@ export function ExportPane({ pageCount, onGoPrint }: { pageCount: number; onGoPr
           <p className="muted small">Round-trip your text. Heading levels map back to chapters and sections; smart typography is preserved.</p>
           <div className="btn-row">
             <button className="btn primary" disabled={busy !== null} onClick={() => void doDocx()}>⤓ Export .docx</button>
-            <button className="btn ghost" disabled={busy !== null} onClick={doMd}>⤓ Export .md</button>
+            <button className="btn ghost" disabled={busy !== null} onClick={() => void doMd()}>⤓ Export .md</button>
             <button className="btn ghost" disabled={busy !== null} onClick={() => fileRef.current?.click()}>⤒ Import .docx / .md / .txt</button>
           </div>
           <input ref={fileRef} type="file" accept=".docx,.md,.markdown,.txt,.html" hidden onChange={(e) => {
@@ -160,8 +164,8 @@ export function ExportPane({ pageCount, onGoPrint }: { pageCount: number; onGoPr
               const assetsDb = await db.assets.where('projectId').equals(project.id).toArray()
               const notes = await db.notes.where('projectId').equals(project.id).toArray()
               const snapshots = await db.snapshots.where('projectId').equals(project.id).toArray()
-              downloadBlob(new Blob([JSON.stringify({ project, assets: assetsDb, notes, snapshots }, null, 2)], { type: 'application/json' }), safeName(project.meta.title) + '.writerscompanion.json')
-              add('Project backup saved')
+              const r = await saveAs(new Blob([JSON.stringify({ project, assets: assetsDb, notes, snapshots }, null, 2)], { type: 'application/json' }), safeName(project.meta.title) + '.writerscompanion.json', 'Writers Companion book backup')
+              add(r.saved ? 'Book backup saved: ' + r.name : 'Book backup cancelled')
             }}>⤓ Backup project (.json)</button>
             <button className="btn ghost" onClick={async () => {
               const input = document.createElement('input')
@@ -189,6 +193,38 @@ export function ExportPane({ pageCount, onGoPrint }: { pageCount: number; onGoPr
               }
               input.click()
             }}>⤒ Restore from backup…</button>
+          </div>
+        </section>
+        <section className="export-card">
+          <h3>Save as &amp; whole-library backup</h3>
+          <label className="chk" title="On: every export opens a Save as window so you choose the folder and file name. Off: files download straight away under their suggested name.">
+            <input type="checkbox" checked={askWhere} onChange={(e) => { setAskWhere(e.target.checked); setAskWhereToSave(e.target.checked) }} /> Ask me where to save each file (Save as…)
+          </label>
+          <p className="muted small">Chrome, Edge and Opera show the real Save window. Other browsers ask for a file name, then download.</p>
+          <div className="btn-row">
+            <button className="btn ghost" onClick={async () => {
+              const lib = await buildLibraryBackup()
+              const stamp = new Date().toISOString().slice(0, 10)
+              const r = await saveAs(new Blob([JSON.stringify(lib)], { type: 'application/json' }), 'The_Writers_Companion_library_' + stamp + '.json', 'Writers Companion whole library')
+              add(r.saved ? `Whole library saved: ${r.name} (${lib.projects.length} books)` : 'Library backup cancelled')
+            }}>⤓ Save whole library as…</button>
+            <button className="btn ghost" onClick={async () => {
+              const input = document.createElement('input')
+              input.type = 'file'
+              input.accept = '.json,application/json'
+              input.onchange = async () => {
+                const f = input.files?.[0]
+                if (!f) return
+                const check = await readLibraryFile(f)
+                if (!check.ok) { add('Library restore failed: ' + check.error); return }
+                const n = check.backup.projects.length
+                if (!confirm(`Restore the whole library from ${f.name}?\n\nThis REPLACES all \u0020books in this browser with the ${n} book(s) in the file. A safety snapshot of the current library is taken first.`)) return
+                await flushNow()
+                try { await restoreLibraryBackup(check.backup); add(`Library restored: ${n} books.`); location.hash = '' ; location.reload() } catch (e) { add('Library restore failed: ' + (e as Error).message) }
+              }
+              input.click()
+            }}>⤒ Restore whole library…</button>
+            <button className="btn ghost" onClick={() => setSnapsOpen(true)}>⏱ App snapshots (every 5 min)…</button>
           </div>
         </section>
         <section className="export-card export-dest">
@@ -228,6 +264,7 @@ export function ExportPane({ pageCount, onGoPrint }: { pageCount: number; onGoPr
         {log.length === 0 && <p className="muted small">Exports and imports will be logged here.</p>}
         {log.map((l, i) => <div key={i} className="log-line">{l}</div>)}
       </section>
+      {snapsOpen && <AppSnapshotsDialog onClose={() => setSnapsOpen(false)} />}
     </div>
   )
 }

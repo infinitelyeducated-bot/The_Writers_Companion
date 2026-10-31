@@ -2,11 +2,26 @@ import Dexie, { type Table } from 'dexie'
 import type { Asset, Note, Project, Snapshot } from '../model/types'
 import { totalWords } from '../model/docUtils'
 
+/** A snapshot of the whole app: every book, its notes and its pictures. */
+export interface AppSnapshot {
+  id: string
+  label: string
+  createdAt: number
+  /** newest updatedAt across all books when taken; used to skip identical snapshots */
+  stamp: number
+  books: number
+  bytes: number
+  projects: Project[]
+  notes: Note[]
+  assets: Asset[]
+}
+
 export class WritersCompanionDB extends Dexie {
   projects!: Table<Project, string>
   snapshots!: Table<Snapshot, string>
   assets!: Table<Asset, string>
   notes!: Table<Note, string>
+  appSnapshots!: Table<AppSnapshot, string>
 
   constructor() {
     super('writerscompanion')
@@ -15,6 +30,10 @@ export class WritersCompanionDB extends Dexie {
       snapshots: 'id, projectId, createdAt',
       assets: 'id, projectId',
       notes: 'id, projectId, updatedAt',
+    })
+    // v2: whole-app snapshots (every five minutes)
+    this.version(2).stores({
+      appSnapshots: 'id, createdAt',
     })
   }
 }
@@ -170,4 +189,90 @@ export async function readBackupFile(file: File): Promise<{ ok: true; backup: Pr
   } catch {
     return { ok: false, error: 'That file could not be read as JSON.' }
   }
+}
+
+
+// ── Whole-app snapshots ──────────────────────────────────────────────────────
+
+export const APP_SNAPSHOT_MINUTES = 5
+export const APP_SNAPSHOT_KEEP = 12 // one hour of five-minute history
+
+/** Take a snapshot of the whole library. Skips (returns null) when nothing has
+ *  changed since the last one, unless force is set, so an idle app does not fill
+ *  storage with identical copies. */
+export async function createAppSnapshot(label: string, force = false): Promise<AppSnapshot | null> {
+  const [projects, notes, assets] = await Promise.all([db.projects.toArray(), db.notes.toArray(), db.assets.toArray()])
+  if (!projects.length) return null
+  const stamp = Math.max(...projects.map((p) => p.updatedAt || 0), ...notes.map((n) => n.updatedAt || 0))
+  const last = await db.appSnapshots.orderBy('createdAt').last()
+  if (!force && last && last.stamp === stamp && last.books === projects.length) return null
+  const bytes = assets.reduce((n, a) => n + (a.bytes || a.dataUrl.length), 0)
+  const snap: AppSnapshot = {
+    id: 'appsnap_' + Math.random().toString(36).slice(2, 10),
+    label,
+    createdAt: Date.now(),
+    stamp,
+    books: projects.length,
+    bytes,
+    projects,
+    notes,
+    assets,
+  }
+  await db.appSnapshots.add(snap)
+  const all = await db.appSnapshots.orderBy('createdAt').toArray()
+  if (all.length > APP_SNAPSHOT_KEEP) await db.appSnapshots.bulkDelete(all.slice(0, all.length - APP_SNAPSHOT_KEEP).map((s) => s.id))
+  return snap
+}
+
+/** Replace the whole library with an app snapshot. A safety snapshot of the
+ *  current state is taken first, so a restore can itself be undone. */
+export async function restoreAppSnapshot(id: string): Promise<void> {
+  const snap = await db.appSnapshots.get(id)
+  if (!snap) throw new Error('That snapshot no longer exists.')
+  await createAppSnapshot('Before restoring ' + new Date(snap.createdAt).toLocaleTimeString(), true)
+  await db.transaction('rw', db.projects, db.notes, db.assets, async () => {
+    await Promise.all([db.projects.clear(), db.notes.clear(), db.assets.clear()])
+    await db.projects.bulkPut(snap.projects)
+    if (snap.notes.length) await db.notes.bulkPut(snap.notes)
+    if (snap.assets.length) await db.assets.bulkPut(snap.assets)
+  })
+}
+
+// ── Whole-library backup file ────────────────────────────────────────────────
+
+export interface LibraryBackup {
+  kind: 'writerscompanion-library'
+  version: 1
+  exportedAt: number
+  projects: Project[]
+  notes: Note[]
+  assets: Asset[]
+  snapshots: Snapshot[]
+}
+
+export async function buildLibraryBackup(): Promise<LibraryBackup> {
+  const [projects, notes, assets, snapshots] = await Promise.all([db.projects.toArray(), db.notes.toArray(), db.assets.toArray(), db.snapshots.toArray()])
+  return { kind: 'writerscompanion-library', version: 1, exportedAt: Date.now(), projects, notes, assets, snapshots }
+}
+
+export async function readLibraryFile(file: File): Promise<{ ok: true; backup: LibraryBackup } | { ok: false; error: string }> {
+  try {
+    const d = JSON.parse(await file.text()) as Partial<LibraryBackup>
+    if (d.kind !== 'writerscompanion-library' || !Array.isArray(d.projects)) return { ok: false, error: 'That is not a whole-library backup (a single-book backup restores from the Export tab).' }
+    return { ok: true, backup: d as LibraryBackup }
+  } catch {
+    return { ok: false, error: 'That file could not be read as JSON.' }
+  }
+}
+
+/** Replace the entire library with a library backup (after a safety snapshot). */
+export async function restoreLibraryBackup(b: LibraryBackup): Promise<void> {
+  await createAppSnapshot('Before library restore', true)
+  await db.transaction('rw', db.projects, db.notes, db.assets, db.snapshots, async () => {
+    await Promise.all([db.projects.clear(), db.notes.clear(), db.assets.clear(), db.snapshots.clear()])
+    await db.projects.bulkPut(b.projects)
+    if (b.notes?.length) await db.notes.bulkPut(b.notes)
+    if (b.assets?.length) await db.assets.bulkPut(b.assets)
+    if (b.snapshots?.length) await db.snapshots.bulkPut(b.snapshots)
+  })
 }

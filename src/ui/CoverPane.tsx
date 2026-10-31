@@ -4,7 +4,7 @@ import { CoverWrap, EbookCover } from '../cover/CoverWrap'
 import { coverGeometry, spineWidth } from '../cover/geometry'
 import { BASE_BOOK_CSS } from '../print/printWindow'
 import { COVER_CSS } from './coverCss'
-import { downloadBlob } from '../util/download'
+import { saveAs } from '../util/saveAs'
 import { safeName } from '../export/epub'
 import { canOpenPrintWindow } from '../target'
 import { FontSelect } from '../fonts/FontSelect'
@@ -81,7 +81,7 @@ html,body{margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust
     const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
     img.onload = () => {
       ctx.drawImage(img, 0, 0)
-      canvas.toBlob((blob) => { if (blob) downloadBlob(blob, safeName(project.meta.title) + '-ebook-cover.png') }, 'image/png')
+      canvas.toBlob((blob) => { if (blob) void saveAs(blob, safeName(project.meta.title) + '-ebook-cover.png', 'PNG image') }, 'image/png')
     }
     img.onerror = () => {
       // fallback: plain canvas rendering
@@ -91,7 +91,7 @@ html,body{margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust
       ctx.fillText(project.meta.title.slice(0, 18), W / 2, H / 3)
       ctx.font = `${W * 0.04}px Georgia`
       ctx.fillText(project.meta.author, W / 2, (H * 2) / 3)
-      canvas.toBlob((blob) => { if (blob) downloadBlob(blob, safeName(project.meta.title) + '-ebook-cover.png') }, 'image/png')
+      canvas.toBlob((blob) => { if (blob) void saveAs(blob, safeName(project.meta.title) + '-ebook-cover.png', 'PNG image') }, 'image/png')
     }
     img.src = url
   }

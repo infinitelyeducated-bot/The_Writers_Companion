@@ -12,7 +12,7 @@ import {
   pageForKey,
 } from '../pageArt'
 import { ChannelFilter } from './PageArtLayers'
-import { downloadBlob } from '../util/download'
+import { saveAs } from '../util/saveAs'
 
 const LAYERS: { id: ArtLayer; label: string; hint: string }[] = [
   { id: 'below', label: 'Below text', hint: 'Under the words. Empty = transparent, so the page shows through.' },
@@ -96,7 +96,7 @@ export function PageArtEditor({ page }: { page: number }) {
     const blob = await (await fetch(a.dataUrl)).blob()
     const ext = (a.mime.split('/')[1] || 'png').replace('jpeg', 'jpg').replace('svg+xml', 'svg')
     const base = (a.name || 'image').replace(/\.[a-z0-9]+$/i, '')
-    await downloadBlob(blob, `${base}.${ext}`)
+    await saveAs(blob, `${base}.${ext}`, "Original image")
   }
 
   return (

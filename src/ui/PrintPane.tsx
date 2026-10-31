@@ -7,6 +7,7 @@ import { LAYOUTS, layoutById } from '../data/layouts'
 import { canOpenPrintWindow, saveVerb } from '../target'
 import { kdpGutterFor as kdpGutter, runPreflight, worstLevel, type Check } from '../export/preflight'
 import { downloadBlob } from '../util/download'
+import { saveAs } from '../util/saveAs'
 import { safeName } from '../export/epub'
 import { FontSelect } from '../fonts/FontSelect'
 import { loadFontFamily } from '../fonts/catalog'
@@ -507,11 +508,11 @@ export function PrintPane({ onPageCount, onCurrentPage }: { onPageCount: (n: num
           <span className="hint">Files are saved with “{saveVerb()}”.</span>
           <button className="btn ghost wide" onClick={async () => {
             const { exportDocx } = await import('../io/docx')
-            downloadBlob(await exportDocx(project), safeName(project.meta.title) + '.docx')
+            await saveAs(await exportDocx(project), safeName(project.meta.title) + '.docx', 'Word document')
           }}>⤓ Manuscript .docx</button>
           <button className="btn ghost wide" onClick={async () => {
             const { docToMarkdown } = await import('../io/markdown')
-            downloadBlob(new Blob([docToMarkdown(project.doc)], { type: 'text/markdown' }), safeName(project.meta.title) + '.md')
+            await saveAs(new Blob([docToMarkdown(project.doc)], { type: 'text/markdown' }), safeName(project.meta.title) + '.md', 'Markdown')
           }}>⤓ Manuscript .md</button>
         </div>
       </aside>
@@ -665,9 +666,10 @@ async function exportJson(project: ReturnType<typeof useProject>['project']) {
   const assets = await db.assets.where('projectId').equals(project.id).toArray()
   const notes = await db.notes.where('projectId').equals(project.id).toArray()
   const snapshots = await db.snapshots.where('projectId').equals(project.id).toArray()
-  downloadBlob(
+  await saveAs(
     new Blob([JSON.stringify({ project, assets, notes, snapshots, exportedAt: Date.now() }, null, 2)], { type: 'application/json' }),
     safeName(project.meta.title) + '.writerscompanion.json',
+    'Writers Companion book backup',
   )
 }
 

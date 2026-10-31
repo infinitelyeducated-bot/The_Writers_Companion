@@ -4,6 +4,9 @@ import { db, saveProject } from '../db/db'
 import { TRIM_PRESETS, type Project } from '../model/types'
 import { EXAMPLES, buildBlank, buildExample } from '../data/examples'
 import { LAYOUTS, layoutById } from '../data/layouts'
+import { AppSnapshotsDialog } from './AppSnapshotsDialog'
+import { saveAs } from '../util/saveAs'
+import { buildLibraryBackup, readLibraryFile, restoreLibraryBackup } from '../db/db'
 import type { LayoutFamily } from '../model/types'
 import { totalWords } from '../model/docUtils'
 import { GuideModal } from './GuideModal'
@@ -23,6 +26,8 @@ export function Library({ onOpen }: { onOpen: (id: string) => void }) {
   const [creating, setCreating] = useState(false)
   const [resetting, setResetting] = useState(false)
   const [resetBusy, setResetBusy] = useState(false)
+  const [snapsOpen, setSnapsOpen] = useState(false)
+  const libRef = useRef<HTMLInputElement>(null)
   const [draft, setDraft] = useState<{ title: string; author: string; genre: string; layout: LayoutFamily }>({ title: '', author: '', genre: '', layout: 'trade' })
   const [seeding, setSeeding] = useState<string | null>(null)
   const [query, setQuery] = useState('')
@@ -162,6 +167,22 @@ export function Library({ onOpen }: { onOpen: (id: string) => void }) {
               }
             }}
           />
+          <button className="btn ghost" title="Save every book, note and picture to one file, choosing where it goes" onClick={async () => {
+            const lib = await buildLibraryBackup()
+            const r = await saveAs(new Blob([JSON.stringify(lib)], { type: 'application/json' }), 'The_Writers_Companion_library_' + new Date().toISOString().slice(0, 10) + '.json', 'Writers Companion whole library')
+            if (r.saved) window.alert('Saved ' + (r.name || 'the library') + ' (' + lib.projects.length + ' books).')
+          }}>Save library as…</button>
+          <button className="btn ghost" title="Restore a whole-library file (replaces every book here)" onClick={() => libRef.current?.click()}>Restore library…</button>
+          <input ref={libRef} type="file" accept=".json,application/json" hidden onChange={async (e) => {
+            const f = e.target.files?.[0]
+            e.target.value = ''
+            if (!f) return
+            const check = await readLibraryFile(f)
+            if (!check.ok) { window.alert('Restore failed: ' + check.error); return }
+            if (!confirm('Restore the whole library from ' + f.name + '?\n\nThis REPLACES every book in this browser with the ' + check.backup.projects.length + ' book(s) in the file. A safety snapshot of the current library is taken first.')) return
+            try { await restoreLibraryBackup(check.backup); location.hash = ''; location.reload() } catch (err) { window.alert('Restore failed: ' + (err as Error).message) }
+          }} />
+          <button className="btn ghost" title="Automatic whole-app snapshots, every 5 minutes" onClick={() => setSnapsOpen(true)}>App snapshots…</button>
           <button className="btn primary" onClick={() => setCreating(true)}>+ New book</button>
           <button
             className="btn btn-reset"
@@ -327,6 +348,8 @@ export function Library({ onOpen }: { onOpen: (id: string) => void }) {
           </div>
         </div>
       )}
+
+      {snapsOpen && <AppSnapshotsDialog onClose={() => setSnapsOpen(false)} />}
 
       {creating && (
         <div className="modal-backdrop" onClick={() => setCreating(false)}>
