@@ -19,7 +19,12 @@ export interface Trim {
  * stage direction; screenplays use monospaced slug lines; trade fiction is
  * the conventional novel page; technical books are dense with headings.
  */
-export type LayoutFamily = 'trade' | 'children' | 'poetry' | 'play' | 'screenplay' | 'technical' | 'memoir'
+export type LayoutFamily =
+  | 'trade' | 'children' | 'poetry' | 'play' | 'screenplay' | 'technical' | 'memoir'
+  // writer-audience families
+  | 'firstnovel' | 'series' | 'professional' | 'family' | 'retirees' | 'hobby' | 'selfpub'
+  // genre families
+  | 'romance' | 'fantasy' | 'scifi' | 'mystery' | 'paranormal' | 'adventure' | 'historical' | 'horror' | 'literary' | 'ya' | 'shortstories'
 
 export type FrontKind =
   | 'titlepage'

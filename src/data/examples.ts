@@ -1,6 +1,7 @@
 import { newChapter, newBlock, para } from '../model/types'
 import type { Block, BookDoc, FrontKind, BackKind, PMNode, Project } from '../model/types'
 import { LAYOUTS, settingsFor, layoutById, type LayoutSpec } from './layouts'
+import { RAW_EXAMPLES } from './examples2'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Example books. One per layout family, each a working excerpt rather than
@@ -8,9 +9,9 @@ import { LAYOUTS, settingsFor, layoutById, type LayoutSpec } from './layouts'
 // be judged, and short enough to read in a minute.
 // ─────────────────────────────────────────────────────────────────────────────
 
-type Role = 'p' | 'h2' | 'h3' | 'bq' | 'brk' | 'stanza' | 'speech' | 'stage' | 'slug' | 'action' | 'transition' | 'ol' | 'ul' | 'img' | 'num'
+export type Role = 'p' | 'h2' | 'h3' | 'bq' | 'brk' | 'stanza' | 'speech' | 'stage' | 'slug' | 'action' | 'transition' | 'ol' | 'ul' | 'img' | 'num'
 
-interface Line {
+export interface Line {
   role: Role
   text?: string
   attrib?: string
@@ -19,7 +20,7 @@ interface Line {
   caption?: string
 }
 
-interface ExampleSpec {
+export interface ExampleSpec {
   layout: LayoutSpec
   meta: Parameters<typeof buildMeta>[0]
   sections: {
@@ -30,7 +31,7 @@ interface ExampleSpec {
   }[]
 }
 
-function buildMeta(m: {
+export function buildMeta(m: {
   title: string
   subtitle?: string
   author: string
@@ -98,7 +99,7 @@ function lineToNode(l: Line, images?: Record<string, string>): PMNode {
   }
 }
 
-function buildDoc(spec: ExampleSpec, images?: Record<string, string>): BookDoc {
+export function buildDoc(spec: Pick<ExampleSpec, 'sections'> & { layout: { id: string } }, images?: Record<string, string>): BookDoc {
   const doc: BookDoc = { version: 1, blocks: [], scenes: {}, footnotes: {} }
   let n = 0
   for (const s of spec.sections) {
@@ -442,6 +443,25 @@ const memoirSpec: ExampleSpec = {
   ],
 }
 
+/** Turn a compact audience/genre example into a full ExampleSpec. */
+function specFromRaw(r: (typeof RAW_EXAMPLES)[number]): ExampleSpec {
+  const sections: ExampleSpec['sections'] = [
+    { type: 'frontmatter', title: 'Title Page', kind: 'titlepage', scenes: [[]] },
+    { type: 'frontmatter', title: 'Copyright', kind: 'copyright', scenes: [[]] },
+  ]
+  if (r.dedication) sections.push({ type: 'frontmatter', title: 'Dedication', kind: 'dedication', scenes: [[{ role: 'p', text: r.dedication }]] })
+  if (r.epigraph) sections.push({ type: 'frontmatter', title: 'Epigraph', kind: 'epigraph', scenes: [[{ role: 'bq', text: r.epigraph[0], attrib: '— ' + r.epigraph[1] }]] })
+  for (const c of r.chapters) sections.push({ type: 'chapter', title: c.title, scenes: [c.paras.map((t) => ({ role: 'p' as Role, text: t }))] })
+  sections.push({ type: 'backmatter', title: 'About the Author', kind: 'aboutAuthor', scenes: [[{ role: 'p', text: r.author + ' writes in this form. This is a worked example: edit it freely or duplicate it to start your own book.' }]] })
+  return {
+    layout: layoutById(r.id as never),
+    meta: buildMeta({ title: r.title, subtitle: r.subtitle, author: r.author, genre: r.genre, description: r.description }),
+    sections,
+  }
+}
+
+const RAW_SPECS: Record<string, ExampleSpec> = Object.fromEntries(RAW_EXAMPLES.map((r) => [r.id, specFromRaw(r)]))
+
 export const EXAMPLE_SECTIONS: Record<string, ExampleSpec> = {
   trade: tradeSpec,
   children: childrenSpec,
@@ -450,6 +470,7 @@ export const EXAMPLE_SECTIONS: Record<string, ExampleSpec> = {
   screenplay: screenplaySpec,
   technical: technicalSpec,
   memoir: memoirSpec,
+  ...RAW_SPECS,
 }
 
 export interface ExampleInfo {
@@ -486,6 +507,8 @@ const TYPICAL_PAGES: Record<string, string> = {
   memoir: 'Aim for roughly 200–350 pages at 5.25 × 8',
 }
 
+const RAW_LENGTH: Record<string, { length: string; pages: string }> = Object.fromEntries(RAW_EXAMPLES.map((r) => [r.id, { length: r.length, pages: r.pages }]))
+
 export const EXAMPLES: ExampleInfo[] = Object.values(EXAMPLE_SECTIONS).map((s) => ({
   id: s.layout.id,
   name: s.layout.name,
@@ -497,8 +520,8 @@ export const EXAMPLES: ExampleInfo[] = Object.values(EXAMPLE_SECTIONS).map((s) =
     const t = s.layout.settings.trim!
     return `${t.width} × ${t.height} in`
   })(),
-  typicalLength: TYPICAL_LENGTHS[s.layout.id] || 'No fixed length · watch the page count, not the word count',
-  typicalPages: TYPICAL_PAGES[s.layout.id] || 'No fixed length · watch the page count, not the word count',
+  typicalLength: TYPICAL_LENGTHS[s.layout.id] || RAW_LENGTH[s.layout.id]?.length || 'No fixed length · watch the page count, not the word count',
+  typicalPages: TYPICAL_PAGES[s.layout.id] || RAW_LENGTH[s.layout.id]?.pages || 'No fixed length · watch the page count, not the word count',
 }))
 
 /** Build a complete, ready-to-open project for a layout family. */

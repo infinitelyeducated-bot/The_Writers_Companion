@@ -24,7 +24,8 @@ so you are only asked once.
 | Accept the licence | First launch | Read the freeware terms. **Yes** opens the app; **No** closes it. |
 | Browse books | Library | Covers on a shelf. Search by title, author or genre. |
 | Start a book | Library → New book | Title, author, genre, then a **layout family** (trade, children's, poetry, play, screenplay, technical, memoir). |
-| Open a worked example | Library shelf | Seven complete short books, one per family, plus the sample novella. Duplicate one to keep the original. |
+| Open a worked example | Library shelf | **25 complete short books, one per layout family**, plus the sample novella. Duplicate one to keep the original. |
+| Pick a style for your kind of book | Library → New book, or Print layout | Layout families for writers (First-time novelists, Series authors, Busy professionals, Grandparents & family stories, Retirees, Hobby writers, Self-publishers) and for genres (Romance, Fantasy, Sci-Fi, Mystery/Thriller/Suspense, Paranormal, Action & adventure, Historical fiction, Horror, Drama & literary, Young adult, Novellas & short stories), alongside the seven craft families (trade, children's, poetry, play, screenplay, technical, memoir). Each sets trim, typeface, leading, chapter openings, scene-break ornament, running heads, contents page and cover palette, and has its own example with a typical length and page count. |
 | Restore a backup | Library → Restore backup… | A `.writerscompanion.json` file replaces nothing until you pick it; leftover images/notes from an old copy of that book are cleared first. |
 | Preview a typeface | Library type bar | Search 228 families (hieroglyphs, runes, storybook faces…). Copy a sample into the clipboard. Opening a book does not change its body face until you apply type in the editor. |
 | Write | Write tab | Three columns: manuscript tree, editor, notes. |

@@ -1,4 +1,5 @@
 import { defaultSettings } from '../model/types'
+import { MORE_LAYOUTS } from './layouts2'
 import type { BackKind, BookMeta, BookSettings, CoverSettings, FrontKind, LayoutFamily } from '../model/types'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -21,7 +22,7 @@ export interface LayoutSpec {
   tag: string
 }
 
-export const LAYOUTS: LayoutSpec[] = [
+const BASE_LAYOUTS: LayoutSpec[] = [
   {
     id: 'trade',
     name: 'Trade fiction',
@@ -177,6 +178,9 @@ export const LAYOUTS: LayoutSpec[] = [
     cover: { background: '#3d3b33', textColor: '#efe9dc', accentColor: '#c2a878', fontFamily: 'Lora', titleSize: 60, authorSize: 24, layout: 'frame' },
   },
 ]
+
+/** The seven original craft families plus the audience and genre families. */
+export const LAYOUTS: LayoutSpec[] = [...BASE_LAYOUTS, ...MORE_LAYOUTS]
 
 export const layoutById = (id: LayoutFamily): LayoutSpec => LAYOUTS.find((l) => l.id === id) || LAYOUTS[0]
 

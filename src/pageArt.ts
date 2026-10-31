@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import type { LayoutFamily } from './model/types'
+import { RAW_EXAMPLES } from './data/examples2'
 
 export type ArtLayer = 'below' | 'text' | 'above'
 
@@ -172,7 +173,10 @@ export function layerStyle(layer: PageArtLayer, src?: string): CSSProperties {
   }
 }
 
-export const TYPICAL_PAGES: Record<LayoutFamily, string> = {
+const RAW_P: Record<string, string> = Object.fromEntries(RAW_EXAMPLES.map((r) => [r.id, r.pages]))
+const RAW_L: Record<string, string> = Object.fromEntries(RAW_EXAMPLES.map((r) => [r.id, r.length]))
+
+export const TYPICAL_PAGES: Partial<Record<LayoutFamily, string>> = {
   trade: 'Aim for roughly 200–400 pages at 6 × 9',
   children: 'Aim for 24–32 pages · the standard picture-book length',
   poetry: 'Aim for roughly 60–120 pages at 5.5 × 8.5',
@@ -182,7 +186,7 @@ export const TYPICAL_PAGES: Record<LayoutFamily, string> = {
   memoir: 'Aim for roughly 200–350 pages at 5.25 × 8',
 }
 
-export const TYPICAL_LENGTHS: Record<LayoutFamily, string> = {
+export const TYPICAL_LENGTHS: Partial<Record<LayoutFamily, string>> = {
   trade: 'Aim for 50,000–120,000 words · a novel that fits the 828-page ceiling',
   children: 'Aim for 300–1,000 words · read-aloud length',
   poetry: 'Aim for 3,000–15,000 words · roughly 50–100 poems',
@@ -195,7 +199,7 @@ export const TYPICAL_LENGTHS: Record<LayoutFamily, string> = {
 export function typicalFor(layout: LayoutFamily | string): { pages: string; length: string } {
   const id = (layout || 'trade') as LayoutFamily
   return {
-    pages: TYPICAL_PAGES[id] || 'No fixed length · watch the page count, not the word count',
-    length: TYPICAL_LENGTHS[id] || 'No fixed length · watch the page count, not the word count',
+    pages: TYPICAL_PAGES[id] || RAW_P[id] || 'No fixed length · watch the page count, not the word count',
+    length: TYPICAL_LENGTHS[id] || RAW_L[id] || 'No fixed length · watch the page count, not the word count',
   }
 }
