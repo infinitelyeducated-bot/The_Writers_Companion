@@ -1,0 +1,12 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>The Writers Companion stress probe</title></head>
+<body style="font:14px system-ui;margin:24px">
+<h3>The Writers Companion capacity probe</h3>
+<p>Generates a synthetic transcript, runs it through The Writers Companion's own layout and
+pagination code, and reports timings and memory.</p>
+<input id="chapters" type="number" value="400" /> chapters
+<input id="paras" type="number" value="12" /> paragraphs each
+<button id="run">Run</button>
+<pre id="out" style="background:#f4f4f4;padding:12px;white-space:pre-wrap"></pre>
+<script type="module" src="/src/stress.ts"></script>
+</body></html>

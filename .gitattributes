@@ -1,0 +1,7 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# The single-file deliverables are generated, minified and must stay byte-for-byte
+# identical on every platform; never let git rewrite their line endings.
+dist-selfcontained/** -text
+dist/** -text

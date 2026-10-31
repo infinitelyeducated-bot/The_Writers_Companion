@@ -1,0 +1,197 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   writerscompanion.css — the file to edit
+   ───────────────────────────────────────────────────────────────────────────
+   This is the stylesheet you change. It is the last stylesheet the app loads,
+   in the editor and on every printed page alike. Rules here are appended after
+   the built-in layout CSS, so matching rules usually override defaults. Normal
+   CSS cascade rules still apply: a more specific selector (or an !important
+   declaration in another rule) can win instead.
+
+   Everything in this file is loaded through `LAYOUT_CSS` in
+   `src/layout/pageCss.ts` — that module adds one small rule in front of it so
+   styles also survive inside the separate window used for PDF export. Nothing
+   else in the app reads this file. In development, save it and let Vite
+   hot-reload; if the preview does not update, switch away from and back to
+   Print layout or refresh the app.
+
+   THE SHAPES YOU CAN STYLE
+   Book pages are real HTML. Every page is `.book-page` and carries:
+       .recto / .verso          right-hand / left-hand page
+       .ptype-title .ptype-copyright .ptype-front .ptype-toc .ptype-part
+       .ptype-chapter .ptype-body .ptype-back .ptype-endnotes .ptype-plate
+       .ptype-blank             a blank inserted to make a chapter start recto
+       .layout-trade .layout-children .layout-poetry .layout-play
+       .layout-screenplay .layout-technical .layout-memoir
+   ...which means "only chapters" is `.book-page.ptype-chapter` and
+   "only portraits in the poetry book" is `.layout-poetry .page-body`.
+
+   Inside a page:
+       .page-body              the text block
+       .run-head[data-head=running]   the running head at the top
+       .folio[data-head=folio]        the page number
+       .open-chrome            chapter / part opening block
+       .open-label .open-title .orn    its number, title and ornament
+       .page-vignette .page-sidebar .page-border .plate-page
+       .page-fn                footnotes at the foot of the page
+       p, .sec-h2, .sec-h3, blockquote.bq, .bq-attr, ul, ol, li,
+       .sb (scene break), figure.img, figcaption, .dropcap
+       .toc-row .toc-t2 .toc-fill .toc-p2        table of contents lines
+       .title-page .tp-title .tp-sub .tp-author .tp-pub
+       .copyright-page .cp-title .cp-small
+
+   The app's own interface (library, editor, panels) is NOT styled here — it is
+   deliberately separate, so editing this file cannot break the workspace
+   around your book. The Print layout panel still sets the book's layout values,
+   but a CSS rule here can override their visual effect. Use this file for
+   refinements the settings do not cover, and scope rules narrowly to avoid
+   changing every page by accident.
+
+   QUICK EXAMPLES: scope to one family and page type:
+       .layout-poetry .ptype-chapter .page-body { ... }
+   scope to a title page in any family:
+       .book-page.ptype-title .tp-title { ... }
+
+   CSS here affects pagination when it changes font metrics, spacing, borders,
+   padding, or available text width. After those edits, wait for repagination,
+   inspect the page count and readiness check, then inspect the saved PDF too.
+   The PDF is rendered by the browser's print engine; check its output before
+   sending it to a printer. This file is bundled into the page styles, so do
+   not assume external stylesheets or font URLs will be available offline or
+   in the separate export window.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+
+/* ─── 1. Body text ────────────────────────────────────────────────────────── */
+
+.book-page .page-body p {
+  /* paragraphs are already set by the panel; this is where you'd add, say,
+     a touch of letter-spacing for a particular typeface */
+}
+
+/* First letter of a chapter opening. This targets the first <p> child in the
+   page body; if the opening starts with another block, it will not match.
+   Use this as a custom alternative to the panel's drop-cap option. If the
+   panel adds a .dropcap element, style .dropcap directly instead. */
+.layout-trade .book-page.ptype-chapter .page-body > p:first-child::first-letter {
+  /* font-size: 3em; float: left; line-height: 0.85; padding-right: 0.06em; */
+}
+
+
+/* ─── 2. Running heads and page numbers ───────────────────────────────────── */
+
+.book-page .run-head[data-head="running"] {
+  /* font-style: italic; */
+  /* color: #555; */
+}
+
+.book-page .folio[data-head="folio"] {
+  /* font-weight: 600; */
+}
+
+/* A hairline under the running head, on both sides of the spread */
+.book-page .run-head[data-head="running"]::after {
+  /* content: ''; display: block; margin: 0.18em auto 0; width: 1.2in;
+     border-bottom: 0.4pt solid #999; */
+}
+
+
+/* ─── 3. Chapter openings ─────────────────────────────────────────────────── */
+
+.book-page .open-chrome .open-label {
+  /* the "CHAPTER ONE" line above the title */
+}
+
+.book-page .open-chrome .open-title {
+  /* color: #222; letter-spacing: 0.01em; */
+}
+
+.book-page .open-chrome .orn {
+  /* the ornament between title and text */
+}
+
+/* A drop cap takes two lines, and the opening block keeps its own bottom
+   margin, so the measured page reserves roughly two lines for the cap. */
+.book-page p.dropcap::first-letter {
+  /* font-size: 3.4em; line-height: 0.8; margin-top: 0.05em; */
+}
+
+
+/* ─── 4. Scene breaks, quotes, lists ──────────────────────────────────────── */
+
+.book-page .sb {
+  /* letter-spacing: 0.6em; color: #888; */
+}
+
+.book-page blockquote.bq {
+  /* border-left: 2pt solid #ccc; padding-left: 0.6em; */
+}
+
+.book-page .bq-attr {
+  /* font-variant: small-caps; letter-spacing: 0.06em; */
+}
+
+
+/* ─── 5. Table of contents ────────────────────────────────────────────────── */
+
+.book-page .toc-row {
+  /* margin-bottom: 0.35em; */
+}
+
+.book-page .toc-row.lvl2 {
+  /* this is a section-level entry, already indented by 1.4em */
+}
+
+.book-page .toc-fill {
+  /* the leader dots, drawn as a background so they never spoil text copying */
+}
+
+
+/* ─── 6. Title and copyright pages ────────────────────────────────────────── */
+
+.book-page .tp-title {
+  /* font-size: 2.4em; */
+}
+
+.book-page .copyright-page {
+  /* font-size: 0.75em; */
+}
+
+
+/* ─── 7. Per-book-type tweaks ─────────────────────────────────────────────── */
+/* Each layout family already has house rules; these show how to overrule one. */
+
+.layout-poetry .page-body {
+  /* poetry can sit a little higher on the page than prose */
+  /* padding-top: 0.2in; */
+}
+
+.layout-screenplay .page-body p {
+  /* screenplays are never justified, whatever the panel says */
+  /* text-align: left; */
+}
+
+.layout-children .ptype-chapter .open-title {
+  /* enormous, friendly titles */
+  /* font-size: 2.2em; */
+}
+
+
+/* ─── 8. Your own additions ───────────────────────────────────────────────── */
+/* Anything else you want to try goes here. Examples:
+
+   • a thin rule between every paragraph on technical pages:
+       .layout-technical .page-body > p + p { border-top: 0.25pt dotted #ddd; }
+
+   • section headings in the accent colour:
+       .book-page .sec-h2 { color: #8a5a2b; }
+
+   • part pages with a tinted panel behind the title:
+       .ptype-part .open-chrome { background: #f4efe6; padding: 1.2em 0.8em; }
+
+   • narrower footnote text:
+       .page-fn .fn-body { font-size: 0.7em; }
+
+   Save the file and switch to the Print layout tab to see it. Changes to type,
+   spacing, borders, padding, or width can repaginate the book. Recheck the
+   preview, page count, readiness check, and exported PDF after such changes.
+*/
