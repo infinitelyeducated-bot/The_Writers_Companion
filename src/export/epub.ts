@@ -88,7 +88,7 @@ export async function buildEpub(project: Project, assets: Asset[]): Promise<Epub
     }
   }
 
-  const chapters = buildEpubXhtml(project.doc, { title: meta.title, author: meta.author, language: lang }, {
+  const chapters = buildEpubXhtml(project.doc, { title: meta.title, author: meta.author, language: lang, copyrightYear: meta.copyrightYear }, {
     endnotes: settings.footnoteMode === 'end' || settings.epub.endnotes,
     coverHref,
     imageHref,
@@ -118,7 +118,7 @@ export async function buildEpub(project: Project, assets: Asset[]): Promise<Epub
       `OEBPS/${c.href}`,
       xhtmlDoc(c.title, c.body, lang, 'styles/book.css', isCover ? 'cover-page' : isNotes ? 'endnotes' : ''),
     )
-    manifest.push(`    <item id="${cid}" href="${c.href}" media-type="application/xhtml+xml"${isNotes ? ' properties="svg"' : ''}/>`)
+    manifest.push(`    <item id="${cid}" href="${c.href}" media-type="application/xhtml+xml"/>`)
     spine.push(`    <itemref idref="${cid}"/>`)
   })
 
@@ -197,7 +197,7 @@ ${navPoints}
   <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
     <dc:identifier id="bookid">${esc(bookId)}</dc:identifier>
     <dc:title>${esc(meta.title)}</dc:title>
-    ${meta.subtitle ? `<dc:title id="subtitle">${esc(meta.subtitle)}</dc:title>` : ''}
+    ${meta.subtitle ? `<dc:title id="subtitle">${esc(meta.subtitle)}</dc:title>\n    <meta refines="#subtitle" property="title-type">subtitle</meta>` : ''}
     <dc:creator id="creator">${esc(meta.author)}</dc:creator>
     <dc:language>${esc(lang)}</dc:language>
     <dc:date>${new Date().toISOString().slice(0, 10)}</dc:date>

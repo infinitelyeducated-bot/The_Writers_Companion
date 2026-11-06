@@ -398,8 +398,12 @@ export function paginate(
   // margins/gutter: iterate twice (gutter depends on page count)
   const pass = (gutterPageCount: number) => runPagination(project, imageResolver, fnNums, gutterPageCount, warnings, naturalSize)
   let result = pass(200)
-  result = pass(result.pageCount)
-  if (result.pageCount !== pass(result.pageCount).pageCount) result = pass(result.pageCount)
+  for (let i = 0; i < 3; i++) {
+    const next = pass(result.pageCount)
+    const settled = next.pageCount === result.pageCount
+    result = next
+    if (settled) break
+  }
 
   // image resolution warnings
   for (const block of doc.blocks) {
@@ -410,6 +414,8 @@ export function paginate(
     }
   }
   void typ
+  // every pass pushes into the same list; report each warning once
+  result.warnings = [...new Set(warnings)]
   return result
 }
 
@@ -819,7 +825,7 @@ function runPagination(
 
   const folioText = (pg: Page | null | undefined) => {
     if (!pg || pg.folio == null) return ''
-    return pg.folioType === 'roman' ? ROMAN_UPPER(pg.folio) : String(pg.folio)
+    return pg.folioType === 'roman' ? ROMAN_UPPER(pg.folio).toLowerCase() : String(pg.folio)
   }
   for (const pg of pages) {
     if (pg.type !== 'toc' || !pg.tocEntries) continue

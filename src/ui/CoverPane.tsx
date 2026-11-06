@@ -199,7 +199,7 @@ html,body{margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust
       <main className="cover-preview">
         {mode === 'print' ? (
           <div className="cover-stage">
-            <div ref={printRef} style={{ transform: 'scale(0.55)', transformOrigin: 'top left' }}>
+            <div ref={printRef} style={{ zoom: 0.55 }}>
               <CoverWrap project={project} pageCount={pageCount} assets={assets} guides={guides} forPrint />
             </div>
           </div>

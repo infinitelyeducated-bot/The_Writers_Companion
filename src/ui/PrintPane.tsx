@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useProject } from '../state/project'
 import { paginate, type PaginationResult } from '../layout/paginate'
-import { BookPage } from '../layout/BookPage'
+import { BookPage, folioLabel } from '../layout/BookPage'
 import { TRIM_PRESETS, type PMNode } from '../model/types'
 import { LAYOUTS, layoutById } from '../data/layouts'
 import { canOpenPrintWindow, saveVerb } from '../target'
 import { kdpGutterFor as kdpGutter, runPreflight, worstLevel, type Check } from '../export/preflight'
-import { downloadBlob } from '../util/download'
 import { saveAs } from '../util/saveAs'
 import { safeName } from '../export/epub'
 import { FontSelect } from '../fonts/FontSelect'
@@ -25,14 +24,12 @@ export function PrintPane({ onPageCount, onCurrentPage }: { onPageCount: (n: num
   const updateGraphics = (patch: Partial<typeof g>) => updateSettings({ graphics: { ...g, ...patch } })
   const [pagination, setPagination] = useState<PaginationResult | null>(null)
   const [busy, setBusy] = useState(false)
-  const [pageNo, setPageNoRaw] = useState(1)
-  const setPageNo = useCallback((n: number | ((p: number) => number)) => {
-    setPageNoRaw((prev) => {
-      const next = typeof n === 'function' ? n(prev) : n
-      onCurrentPage?.(next)
-      return next
-    })
-  }, [onCurrentPage])
+  const [pageNo, setPageNo] = useState(1)
+  // tell the workspace which page is showing — from an effect, never from inside
+  // a state updater (that updates a parent component while this one renders)
+  useEffect(() => {
+    onCurrentPage?.(pageNo)
+  }, [pageNo, onCurrentPage])
   const [zoom, setZoom] = useState(0.72)
   const [guides, setGuides] = useState(true)
   const [showAll, setShowAll] = useState(false)
@@ -74,7 +71,7 @@ export function PrintPane({ onPageCount, onCurrentPage }: { onPageCount: (n: num
       )
       setBusy(false)
     }, 30)
-  }, [project, assets, onPageCount, setPageNo, recordPagination])
+  }, [project, assets, onPageCount, recordPagination])
 
   useEffect(() => {
     void loadFontFamily(project.settings.typography.fontFamily)
@@ -85,11 +82,6 @@ export function PrintPane({ onPageCount, onCurrentPage }: { onPageCount: (n: num
     const t = window.setTimeout(repaginate, 1500)
     return () => window.clearTimeout(t)
   }, [repaginate])
-
-  const openPrintWindow = () => {
-    void downloadBlob(new Blob(['<!doctype html><title>The Writers Companion</title>'], { type: 'text/html' }), 'placeholder.html')
-  }
-  void openPrintWindow
 
   const doPrintPdf = async () => {
     if (!pagination) return
@@ -113,8 +105,7 @@ export function PrintPane({ onPageCount, onCurrentPage }: { onPageCount: (n: num
   const buildIndex = () => {
     if (!pagination) return
     const terms = new Map<string, Set<string>>()
-    const folio = (p: import('../layout/paginate').Page) =>
-      p.folio == null ? '' : p.folioType === 'roman' ? String(p.folio) : String(p.folio)
+    const folio = (p: import('../layout/paginate').Page) => folioLabel(p)
     for (const p of pagination.pages) {
       for (const it of p.items) {
         if (!it.html) continue
@@ -187,10 +178,10 @@ export function PrintPane({ onPageCount, onCurrentPage }: { onPageCount: (n: num
         {project.settings.trim.preset === 'custom' && (
           <div className="row2">
             <Field label="Width (in)">
-              <input type="number" step="0.01" value={project.settings.trim.width} onChange={(e) => updateSettings({ trim: { ...project.settings.trim, width: Number(e.target.value) } })} />
+              <input type="number" step="0.01" value={project.settings.trim.width} onChange={(e) => { const v = Number(e.target.value); if (v > 0) updateSettings({ trim: { ...project.settings.trim, width: v } }) }} />
             </Field>
             <Field label="Height (in)">
-              <input type="number" step="0.01" value={project.settings.trim.height} onChange={(e) => updateSettings({ trim: { ...project.settings.trim, height: Number(e.target.value) } })} />
+              <input type="number" step="0.01" value={project.settings.trim.height} onChange={(e) => { const v = Number(e.target.value); if (v > 0) updateSettings({ trim: { ...project.settings.trim, height: v } }) }} />
             </Field>
           </div>
         )}
@@ -456,7 +447,7 @@ export function PrintPane({ onPageCount, onCurrentPage }: { onPageCount: (n: num
 
         <div className="preview-scroll">
           {pagination && !showAll && page && (
-            <div className="spread" style={{ transform: `scale(${zoom})` }}>
+            <div className="spread" style={{ zoom }}>
               <PageSlot p={pagination.pages[pageNo - 2]} project={project} pagination={pagination} guides={guides} />
               <PageSlot p={page} project={project} pagination={pagination} guides={guides} />
             </div>

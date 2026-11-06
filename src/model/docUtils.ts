@@ -136,12 +136,14 @@ export function firstText(nodes: PMNode[] | undefined): string {
   return ''
 }
 
+const BLOCK_TYPES = new Set(['paragraph', 'heading', 'blockquote', 'listItem', 'bulletList', 'orderedList'])
+
 export function plainText(nodes: PMNode[] | undefined): string {
   if (!nodes) return ''
   let out = ''
   for (const n of nodes) {
     if (n.type === 'text') out += n.text
-    else if ('content' in n && n.content) out += plainText(n.content as PMNode[]) + (n.type === 'paragraph' ? '\n\n' : '')
+    else if ('content' in n && n.content) out += plainText(n.content as PMNode[]) + (BLOCK_TYPES.has(n.type) ? '\n\n' : '')
   }
   return out.trim()
 }

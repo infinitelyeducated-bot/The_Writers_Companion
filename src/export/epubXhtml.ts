@@ -11,7 +11,7 @@ const esc = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
 const slug = (s: string, i: number) =>
-  'ch' + String(i + 1).padStart(3, '0') + '-' + (s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'section')
+  'ch' + String(i + 1).padStart(3, '0') + '-' + (s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'section') + '.xhtml'
 
 function inlineXhtml(nodes: BookDoc['scenes'][string], fnNums: Map<string, number>, endnotes: boolean): string {
   return (nodes || [])
@@ -133,7 +133,7 @@ export interface EpubChapterDoc {
   navLevel: 1 | 2
 }
 
-export function buildEpubXhtml(doc: BookDoc, meta: { title: string; author: string; language: string }, opts: { endnotes: boolean; coverHref: string | null; imageHref: (id: string) => string | null }): EpubChapterDoc[] {
+export function buildEpubXhtml(doc: BookDoc, meta: { title: string; author: string; language: string; copyrightYear?: string }, opts: { endnotes: boolean; coverHref: string | null; imageHref: (id: string) => string | null }): EpubChapterDoc[] {
   const fnNums = new Map<string, number>()
   let n = 0
   for (const block of doc.blocks) {
@@ -182,7 +182,7 @@ export function buildEpubXhtml(doc: BookDoc, meta: { title: string; author: stri
           title: 'Copyright',
           inNav: false,
           navLevel: 1,
-          body: `<section epub:type="copyright-page"><p class="cp">Copyright © ${new Date().getFullYear()} ${esc(meta.author)}. All rights reserved.</p>\n${body}</section>`,
+          body: `<section epub:type="copyright-page"><p class="cp">Copyright © ${esc(String(meta.copyrightYear || new Date().getFullYear()))} ${esc(meta.author)}. All rights reserved.</p>\n${body}</section>`,
         })
       }
       continue

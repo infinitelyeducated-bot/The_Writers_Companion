@@ -46,11 +46,11 @@ export function CoverWrap({ project, pageCount, assets, guides, forPrint, scale 
         {c.layout === 'frame' && <div className="cw-frame" />}
         <div className="cw-back-inner">
           {c.backText && (
-            <div className="cw-backtext" style={{ fontSize: `${authorFont * 0.62}rem` }}>
+            <div className="cw-backtext" style={{ fontSize: `${authorFont * 0.62}in` }}>
               {c.backText.split(/\n\s*\n/).map((p, i) => <p key={i}>{p}</p>)}
             </div>
           )}
-          {c.publisherLogoText && <div className="cw-pub" style={{ fontSize: `${authorFont * 0.5}rem` }}>{c.publisherLogoText}</div>}
+          {c.publisherLogoText && <div className="cw-pub" style={{ fontSize: `${authorFont * 0.5}in` }}>{c.publisherLogoText}</div>}
         </div>
         {showBarcode && (
           <div className="cw-barcode" style={{ width: `${g.barcodeW}in`, height: `${g.barcodeH}in` }}>
@@ -76,16 +76,16 @@ export function CoverWrap({ project, pageCount, assets, guides, forPrint, scale 
 
       {/* FRONT */}
       <div className="cw-panel cw-front" style={{ backgroundImage: frontImg ? `url(${frontImg})` : undefined }}>
-        {c.layout === 'band' && <div className="cw-band" style={{ height: `${(titleFont * titleLines.length * 1.4 + 0.9).toFixed(2)}rem` }} />}
+        {c.layout === 'band' && <div className="cw-band" style={{ height: `${(titleFont * titleLines.length * 1.4 + 0.9).toFixed(2)}in` }} />}
         {c.layout === 'frame' && <div className="cw-frame" />}
         <div className="cw-front-inner">
           {c.layout === 'minimal' && <div className="cw-mini-rule" />}
-          <h1 className="cw-title" style={{ fontSize: `${titleFont}rem`, lineHeight: 1.08 }}>
+          <h1 className="cw-title" style={{ fontSize: `${titleFont}in`, lineHeight: 1.08 }}>
             {titleLines.map((l, i) => <span key={i}>{l}<br /></span>)}
           </h1>
-          {meta.subtitle && <p className="cw-sub" style={{ fontSize: `${authorFont * 0.78}rem` }}>{meta.subtitle}</p>}
+          {meta.subtitle && <p className="cw-sub" style={{ fontSize: `${authorFont * 0.78}in` }}>{meta.subtitle}</p>}
           {c.layout !== 'minimal' && <div className="cw-rule" />}
-          <p className="cw-author" style={{ fontSize: `${authorFont}rem` }}>{meta.author}</p>
+          <p className="cw-author" style={{ fontSize: `${authorFont}in` }}>{meta.author}</p>
         </div>
       </div>
 

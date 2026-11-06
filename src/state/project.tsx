@@ -108,12 +108,15 @@ export function ProjectProvider({ initial, children }: { initial: Project; child
     window.addEventListener('beforeunload', onBeforeUnload)
     window.addEventListener('pagehide', onBeforeUnload)
     document.addEventListener('visibilitychange', onHide)
-    window.addEventListener('blur', onBeforeUnload)
+    const onBlur = () => {
+      if (dirty.current) void flush()
+    }
+    window.addEventListener('blur', onBlur)
     return () => {
       window.removeEventListener('beforeunload', onBeforeUnload)
       window.removeEventListener('pagehide', onBeforeUnload)
       document.removeEventListener('visibilitychange', onHide)
-      window.removeEventListener('blur', onBeforeUnload)
+      window.removeEventListener('blur', onBlur)
       if (timer.current) window.clearTimeout(timer.current)
       if (dirty.current) void saveProject(latest.current)
     }
@@ -121,11 +124,11 @@ export function ProjectProvider({ initial, children }: { initial: Project; child
 
   const mutate = useCallback(
     (fn: (p: Project) => Project) => {
-      setProject((prev) => {
-        const next = fn(prev)
-        latest.current = next
-        return next
-      })
+      // computed from the latest value rather than inside a state updater: updaters
+      // may run twice (StrictMode), which would take every snapshot twice
+      const next = fn(latest.current)
+      latest.current = next
+      setProject(next)
       schedule()
     },
     [schedule],

@@ -7,9 +7,14 @@ import { EXAMPLES, buildExample } from './data/examples'
 
 /** Seed a demo book once, so the app is never an empty shell on first run.
  *  Disabled until the freeware licence is accepted, so declining leaves no trace. */
+let seeding = false
+
 export function useSeedDemo(enabled = true) {
   useEffect(() => {
-    if (!enabled) return
+    // the effect can fire twice (StrictMode, licence accepted quickly); two runs
+    // would both see an empty library and seed the demo book twice
+    if (!enabled || seeding) return
+    seeding = true
     void (async () => {
       const count = await db.projects.count()
       if (count > 0) return

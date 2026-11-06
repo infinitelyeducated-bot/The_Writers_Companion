@@ -45,8 +45,8 @@ export async function getProject(id: string): Promise<Project | undefined> {
 }
 
 export async function saveProject(p: Project): Promise<void> {
-  p.updatedAt = Date.now()
-  await db.projects.put(p)
+  // write a copy: the object passed in is usually live React state
+  await db.projects.put({ ...p, updatedAt: Date.now() })
 }
 
 export async function createSnapshot(p: Project, label: string): Promise<Snapshot> {

@@ -8,6 +8,30 @@ export interface Skin {
   vars: Record<string, string>
 }
 
+/** Relative luminance (0 black … 1 white) of a #rrggbb colour. */
+function lum(hex: string): number {
+  const n = parseInt(hex.replace('#', ''), 16)
+  const ch = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => {
+    const c = v / 255
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+  })
+  return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2]
+}
+
+/** Surface tokens every skin needs but only the default spells out: input
+ *  fields, the writing desk behind the page, the print-preview table, and the
+ *  text colour that sits on an accent-filled button. */
+function derived(bg: string, panel2: string, accent: string): Record<string, string> {
+  const dark = lum(bg) < 0.2
+  return {
+    '--field': dark ? panel2 : '#ffffff',
+    '--editor-bg': bg,
+    '--preview-bg': dark ? bg : panel2,
+    '--on-accent': lum(accent) > 0.45 ? '#111111' : '#ffffff',
+    'color-scheme': dark ? 'dark' : 'light',
+  }
+}
+
 const S = (
   id: string,
   name: string,
@@ -26,6 +50,7 @@ const S = (
   id,
   name,
   vars: {
+    ...derived(bg, panel2, accent),
     '--bg': bg,
     '--panel': panel,
     '--panel-2': panel2,
@@ -41,7 +66,11 @@ const S = (
 })
 
 export const SKINS: Skin[] = [
-  { id: 'default', name: 'The Writers Companion classic', vars: {} },
+  // the stylesheet's own palette ("Inkwell": warm paper, ink-blue accent)
+  { id: 'default', name: 'Inkwell (default)', vars: {} },
+  S('inkwell-dark', 'Inkwell Night', '#13161d', '#1a1e27', '#232835', '#e7e9ef', '#b8bdcb', '#8b91a3', '#2b3140', '#3a4154', '#8ea2ff', '#aebcff', '#232c4f'),
+  // the original parchment-and-leather look, kept for anyone who prefers it
+  S('classic', 'Classic Parchment', '#f6f3ee', '#fffdfa', '#f0ebe2', '#1d1b18', '#4a453d', '#7c7468', '#e2dbcf', '#d3c9b8', '#8a5a2b', '#b5793a', '#f2e7d8'),
   // ── the requested six ──────────────────────────────────────────────────────
   S('rocknroll', 'Rock and Roll', '#13090b', '#1f1014', '#2b161c', '#f4e3e7', '#d9b8c0', '#9e7b85', '#3a1f27', '#56303c', '#e4363f', '#ff6b5e', '#3d1118'),
   S('space', 'Space', '#060a16', '#0d1424', '#141e35', '#e8edf7', '#b9c4dd', '#7e8aa8', '#1d2941', '#2b3a5c', '#5b8cff', '#8fb4ff', '#14213f'),

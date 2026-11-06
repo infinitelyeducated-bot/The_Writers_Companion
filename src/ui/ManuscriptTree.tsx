@@ -43,14 +43,22 @@ export function ManuscriptTree({ activeSceneId, onSelect }: Props) {
     }, { snapshot: 'Reorder' })
   }
 
+  // new chapters and parts belong to the body of the book: insert them before
+  // the back matter (acknowledgments, about the author…), not after it
+  const insertBeforeBack = (d: typeof doc, block: (typeof doc.blocks)[number]) => {
+    const firstBack = d.blocks.findIndex((b) => b.type === 'backmatter')
+    const blocks = [...d.blocks]
+    blocks.splice(firstBack < 0 ? blocks.length : firstBack, 0, block)
+    return blocks
+  }
   const addChapter = () => {
     const { block, scenes } = newBlock('chapter', `Chapter ${doc.blocks.filter((b) => b.type === 'chapter').length + 1}`)
-    updateDoc((d) => ({ ...d, blocks: [...d.blocks, block], scenes: { ...d.scenes, ...scenes } }))
+    updateDoc((d) => ({ ...d, blocks: insertBeforeBack(d, block), scenes: { ...d.scenes, ...scenes } }))
     onSelect(block.id, block.sceneIds[0])
   }
   const addPart = () => {
     const { block, scenes } = newBlock('part', `Part ${doc.blocks.filter((b) => b.type === 'part').length + 1}`)
-    updateDoc((d) => ({ ...d, blocks: [...d.blocks, block], scenes: { ...d.scenes, ...scenes } }))
+    updateDoc((d) => ({ ...d, blocks: insertBeforeBack(d, block), scenes: { ...d.scenes, ...scenes } }))
     onSelect(block.id, block.sceneIds[0])
   }
   const addMatter = (type: 'frontmatter' | 'backmatter', kind: FrontKind | BackKind, title: string) => {
